@@ -333,8 +333,23 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
         }
 
         $model = $this->model->newInstance($attributes);
+        try
+        {
+            // Does this have a user relationship? If so, tie the current user to it
+            if(get_class($this->model->user()) == 'Illuminate\Database\Eloquent\Relations\BelongsTo')
+            {
+                $model->user()->associate(Auth::user());
+            }
+        }
+        catch (BadMethodCallException $e)
+        {
+            // Do nothing, this is fine
+            // User Relationship simply does not exist in this case
+        }
         $model->save();
         $this->resetModel();
+        // Reset the model back to defaults, so it doesn't include the user relationship
+        $model = $this->model->find($model->id);
 
         event(new RepositoryEntityCreated($this, $model));
 

@@ -37,7 +37,8 @@ class RequestCriteria implements CriteriaInterface {
         $orderBy            = $this->request->get( config('repository.criteria.params.orderBy','orderBy') , null);
         $sortedBy           = $this->request->get( config('repository.criteria.params.sortedBy','sortedBy') , 'asc');
         $sortedBy           = !empty($sortedBy) ? $sortedBy : 'asc';
-        
+        $with               = $this->request->get( config('repository.criteria.params.with','with') , null);
+
         if( $search && is_array($fieldsSearchable) && count($fieldsSearchable) )
         {
 
@@ -102,6 +103,16 @@ class RequestCriteria implements CriteriaInterface {
             }
 
             $model = $model->select($filter);
+        }
+
+        if( $with )
+        {
+            $with = $this->parserWithData($with);
+            foreach($with as $tmodel => $fields)
+            {
+                $withTmp = count($fields) ? [$tmodel => function($query) use($fields) { $query->select( explode(',',$fields) ); }] : $tmodel;
+                $model = $model->with($withTmp);
+            }
         }
 
         return $model;
@@ -205,4 +216,34 @@ class RequestCriteria implements CriteriaInterface {
 
         return $fields;
     }
+
+    /**
+     * @param $with
+     * @return array
+     */
+    protected function parserWithData($with){
+
+        $searchData = [];
+
+        $fields = explode(';', $with);
+
+        foreach($fields as $row)
+        {
+            try
+            {
+                if(stripos($row,':'))
+                {
+                    list($field, $value) = explode(':', $row);
+                    $searchData[$field] = $value;
+                } else {
+                    $searchData[$row] = null;
+                }
+            }catch (\Exception $e){
+                //Surround offset error
+            }
+        }
+
+        return $searchData;
+    }
+
 }

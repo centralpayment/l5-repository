@@ -14,6 +14,13 @@ class $CLASS$RepositoryEloquent extends BaseRepository implements $CLASS$Reposit
     protected $rules = [];
 
     /**
+     * Searchable Fields for RequestCritera (URL Search)
+     *
+     * @var array
+     */
+    //protected $fieldSearchable = [];
+
+    /**
      * Specify Model class name
      *
      * @return string
@@ -22,6 +29,18 @@ class $CLASS$RepositoryEloquent extends BaseRepository implements $CLASS$Reposit
     {
         return '$MODEL$';
     }
+
+    /**
+     * Specify Validator class name
+     *
+     * @return mixed
+     */
+    /*
+    public function validator()
+    {
+        return '{VALIDATOR}';
+    }
+    */
 
     /**
      *
