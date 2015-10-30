@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Container\Container as Application;
 use Illuminate\Support\Collection;
 use Prettus\Validator\Exceptions\ValidatorException;
+use BadMethodCallException;
+use Auth;
 
 /**
  * Class BaseRepository
@@ -336,7 +338,7 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
         try
         {
             // Does this have a user relationship? If so, tie the current user to it
-            if(get_class($this->model->user()) == 'Illuminate\Database\Eloquent\Relations\BelongsTo')
+            if(get_class($this->model->user()) == 'Illuminate\Database\Eloquent\Relations\BelongsTo' && class_exists('Auth'))
             {
                 $model->user()->associate(Auth::user());
             }
