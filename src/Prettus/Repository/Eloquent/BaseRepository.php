@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Container\Container as Application;
 use Illuminate\Support\Collection;
 use Prettus\Validator\Exceptions\ValidatorException;
-use BadMethodCallException;
-use Auth;
 
 /**
  * Class BaseRepository
@@ -335,23 +333,8 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
         }
 
         $model = $this->model->newInstance($attributes);
-        try
-        {
-            // Does this have a user relationship? If so, tie the current user to it
-            if(get_class($this->model->user()) == 'Illuminate\Database\Eloquent\Relations\BelongsTo' && class_exists('Auth'))
-            {
-                $model->user()->associate(Auth::user());
-            }
-        }
-        catch (BadMethodCallException $e)
-        {
-            // Do nothing, this is fine
-            // User Relationship simply does not exist in this case
-        }
         $model->save();
         $this->resetModel();
-        // Reset the model back to defaults, so it doesn't include the user relationship
-        $model = $this->model->find($model->id);
 
         event(new RepositoryEntityCreated($this, $model));
 
@@ -381,12 +364,12 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
 
         $model = $this->model->findOrFail($id);
         $model->fill($attributes);
+        event(new RepositoryEntityUpdated($this, $model));
         $model->save();
 
         $this->skipPresenter($_skipPresenter);
         $this->resetModel();
 
-        event(new RepositoryEntityUpdated($this, $model));
 
         return $this->parserResult($model);
     }
