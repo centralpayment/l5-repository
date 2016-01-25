@@ -5,6 +5,7 @@ use Illuminate\Support\Collection;
 use Prettus\Repository\Generators\ModelGenerator;
 use Prettus\Repository\Generators\RepositoryEloquentGenerator;
 use Prettus\Repository\Generators\RepositoryInterfaceGenerator;
+use Prettus\Repository\Generators\ControllerGenerator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -60,6 +61,12 @@ class RepositoryCommand extends Command {
             'model'     => $model
         ]));
 
+        if($this->option('controller'))
+        {
+            $this->generators->push(New ControllerGenerator([
+                'name'  => $this->argument('name')
+            ]));
+        }
 
         foreach( $this->generators as $generator)
         {
@@ -91,6 +98,7 @@ class RepositoryCommand extends Command {
         return [
             ['fillable', null, InputOption::VALUE_OPTIONAL, 'The fillable attributes.', null],
             ['rules', null, InputOption::VALUE_OPTIONAL, 'The rules of validation attributes.', null],
+            ['controller', 'c', InputOption::VALUE_NONE, 'Generate a controller as well', null],
             ['force', 'f', InputOption::VALUE_NONE, 'Force the creation if file already exists.', null]
         ];
     }
